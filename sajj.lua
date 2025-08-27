@@ -145,11 +145,70 @@ button.MouseButton1Click:Connect(function()
         disableTag.Name = "DeltaReminderDisabled"
         disableTag.Parent = player
     end
-    
-    fadeOut()
 
-    -- Load Rayfield UI after reminder closes
-    task.delay(0.7, function() -- slight delay so fade out finishes first
+    -- Create blur effect
+    local blur = Instance.new("BlurEffect", game.Lighting)
+    blur.Size = 15
+
+    -- Loading UI
+    local loading = Instance.new("TextLabel")
+    loading.Size = UDim2.new(1, 0, 0.2, 0)
+    loading.Position = UDim2.new(0, 0, 0.4, 0)
+    loading.BackgroundTransparency = 1
+    loading.Text = "Loading..."
+    loading.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loading.TextScaled = true
+    loading.Font = Enum.Font.GothamBold
+    loading.Parent = frame
+
+    -- Progress bar background
+    local barBg = Instance.new("Frame")
+    barBg.Size = UDim2.new(0.8, 0, 0.05, 0)
+    barBg.Position = UDim2.new(0.1, 0, 0.65, 0)
+    barBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    barBg.Parent = frame
+
+    local barFill = Instance.new("Frame")
+    barFill.Size = UDim2.new(0, 0, 1, 0)
+    barFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    barFill.Parent = barBg
+
+    -- Gradient
+    local grad = Instance.new("UIGradient", barFill)
+    grad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 170, 255))
+    }
+    grad.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0, 0),
+        NumberSequenceKeypoint.new(1, 0.2)
+    }
+
+    -- Animate Fill
+    TweenService:Create(barFill, TweenInfo.new(5, Enum.EasingStyle.Sine), {
+        Size = UDim2.new(1, 0, 1, 0)
+    }):Play()
+
+    -- Soft chime sound
+    local sound = Instance.new("Sound", frame)
+    sound.SoundId = "rbxassetid://9118823106"
+    sound.Volume = 0.5
+    sound:Play()
+
+    -- Fade out and cleanup after 5s
+    task.delay(5, function()
+        TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(title, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TweenService:Create(message, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TweenService:Create(loading, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TweenService:Create(barFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(barBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(shadow, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
+        wait(0.6)
+        blur:Destroy()
+        screenGui:Destroy()
+
+        -- Load Rayfield after exit
         loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
     end)
 end)
